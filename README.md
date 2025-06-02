@@ -6,7 +6,7 @@
 
 ---
 
-## 🧩 Features
+## Features
 
 - Create a regular polygon grid over the selected vector layer  
 - Choose from predefined map scales (1:500 to 1:25000)  
@@ -17,7 +17,7 @@
 
 ---
 
-## 🚀 Installation
+## Installation
 
 1. Download the latest ZIP file  
 2. Open QGIS → Plugins → Manage and Install Plugins → Install from ZIP  
@@ -25,13 +25,13 @@
 
 ---
 
-## 📬 Feedback & Issues
+## Feedback & Issues
 
 Please use the [GitHub Issues](https://github.com/Senolbaskaya/atlas-gittergenerator/issues) page to report bugs or suggest new features.
 
 ---
 
-## 🧑‍💻 Author
+## Author
 
 **Senol Baskaya**  
 📧 senolbaskaya@gmail.com
@@ -40,6 +40,6 @@ Please use the [GitHub Issues](https://github.com/Senolbaskaya/atlas-gittergener
 
 ---
 
-## 📜 License
+##  License
 
 MIT License
