@@ -1,7 +1,4 @@
-import datetime
 import os
-import string
-
 from qgis.PyQt.QtWidgets import (
     QAction, QDialog, QVBoxLayout, QLabel,
     QComboBox, QPushButton, QMessageBox, QProgressDialog, QApplication
@@ -16,6 +13,7 @@ from qgis.core import (
     QgsCoordinateTransform, QgsCoordinateTransformContext,
     QgsSpatialIndex
 )
+
 
 class AtlasGitterGenerator:
     def __init__(self, iface):
@@ -55,16 +53,19 @@ class AtlasGitterGenerator:
 
         layout.addWidget(QLabel("Maßstab wählen:"))
         self.scale_combo = QComboBox()
-        self.scale_options = {"1:500": 500, "1:1000": 1000, "1:2000": 2000, "1:3000": 3000,
-                              "1:5000": 5000, "1:10000": 10000, "1:25000": 25000}
-        for scale in self.scale_options:
-            self.scale_combo.addItem(scale)
+        self.scale_options = ["1:500", "1:750", "1:1000", "1:1500", "1:2000", "1:3000", "1:4000", "1:5000", "1:10000", "1:15000" , "1:20000", "1:25000"]
+        self.scale_combo.addItems(self.scale_options)
         layout.addWidget(self.scale_combo)
 
         layout.addWidget(QLabel("Layout-Format:"))
         self.format_combo = QComboBox()
         self.format_combo.addItems(["quer", "hoch"])
         layout.addWidget(self.format_combo)
+
+        layout.addWidget(QLabel("Papiergröße:"))
+        self.paper_combo = QComboBox()
+        self.paper_combo.addItems(["A4", "A3"])
+        layout.addWidget(self.paper_combo)
 
         run_button = QPushButton("Gitter erstellen")
         run_button.clicked.connect(lambda: self.generate_grid(dialog))
@@ -78,17 +79,25 @@ class AtlasGitterGenerator:
 
     def get_default_projected_crs(self, layer):
         extent = layer.extent()
+
+        if extent.isEmpty():
+            QMessageBox.warning(None, "Fehler", "Layer hat keine gültige Geometrie oder ist leer.")
+            return QgsCoordinateReferenceSystem("EPSG:25832")
+
         center_x = (extent.xMinimum() + extent.xMaximum()) / 2.0
         center_y = (extent.yMinimum() + extent.yMaximum()) / 2.0
 
         if layer.crs().isGeographic():
-            zone = int((center_x + 180) / 6) + 1
-            epsg_code = 32600 + zone if center_y >= 0 else 32700 + zone
-            return QgsCoordinateReferenceSystem(f"EPSG:{epsg_code}")
+            try:
+                zone = int((center_x + 180) / 6) + 1
+                epsg_code = 32600 + zone if center_y >= 0 else 32700 + zone
+                return QgsCoordinateReferenceSystem(f"EPSG:{epsg_code}")
+            except ValueError:
+                QMessageBox.warning(None, "Fehler", "Ungültiges Koordinatenzentrum erkannt.")
+                return QgsCoordinateReferenceSystem("EPSG:25832")
         else:
             return layer.crs()
-
-    # Convert column index to A-Z label
+            
     def get_column_label(self, index):
         result = ""
         index -= 1
@@ -97,10 +106,44 @@ class AtlasGitterGenerator:
             index = index // 26 - 1
         return result
 
+    grid_sizes = {
+        "A4": {
+            "1:500": {"hoch": (95.0, 138.5), "quer": (138.5, 95.0)},
+            "1:750": {"hoch": (142.5, 207.8), "quer": (207.8, 142.5)},
+            "1:1000": {"hoch": (190.0, 277.0), "quer": (277.0, 190.0)},
+            "1:1500": {"hoch": (285.0, 415.5), "quer": (415.5, 285.0)},
+            "1:2000": {"hoch": (380.0, 554.0), "quer": (554.0, 380.0)},
+            "1:3000": {"hoch": (570.0, 831.0), "quer": (831.0, 570.0)},
+            "1:4000": {"hoch": (760.0, 1108.0), "quer": (1108.0, 760.0)},
+            "1:5000": {"hoch": (950.0, 1385.0), "quer": (1385.0, 950.0)},
+            "1:10000": {"hoch": (1900.0, 2770.0), "quer": (2770.0, 1900.0)},
+            "1:15000": {"hoch": (2850.0, 4155.0), "quer": (4155.0, 2850.0)},
+            "1:20000": {"hoch": (3800.0, 5540.0), "quer": (5540.0, 3800.0)},
+            "1:25000": {"hoch": (4750.0, 6925.0), "quer": (6925.0, 4750.0)}
+        },
+        "A3": {
+            "1:500": {"hoch": (138.5, 200.0), "quer": (200.0, 138.5)},
+            "1:750": {"hoch": (207.8, 300.0), "quer": (300.0, 207.8)},
+            "1:1000": {"hoch": (277.0, 400.0), "quer": (400.0, 277.0)},
+            "1:1500": {"hoch": (415.5, 600.0), "quer": (600.0, 415.5)},
+            "1:2000": {"hoch": (554.0, 800.0), "quer": (800.0, 554.0)},
+            "1:3000": {"hoch": (831.0, 1200.0), "quer": (1200.0, 831.0)},
+            "1:4000": {"hoch": (1108.0, 1600.0), "quer": (1600.0, 1108.0)},
+            "1:5000": {"hoch": (1385.0, 2000.0), "quer": (2000.0, 1385.0)},
+            "1:10000": {"hoch": (2770.0, 4000.0), "quer": (4000.0, 2770.0)},
+            "1:15000": {"hoch": (4155.0, 6000.0), "quer": (6000.0, 4155.0)},
+            "1:20000": {"hoch": (5540.0, 8000.0), "quer": (8000.0, 5540.0)},
+            "1:25000": {"hoch": (6925.0, 10000.0), "quer": (10000.0, 6925.0)}
+        }
+    }
+
     def generate_grid(self, dialog):
         layer_name = self.layer_combo.currentText()
         scale_label = self.scale_combo.currentText()
         orientation = self.format_combo.currentText()
+        paper_size = self.paper_combo.currentText()
+
+        grid_width, grid_height = self.grid_sizes[paper_size][scale_label][orientation]
 
         layers = QgsProject.instance().mapLayersByName(layer_name)
         if not layers or layer_name == "Kein Vektor-Layer gefunden":
@@ -109,13 +152,6 @@ class AtlasGitterGenerator:
             return
         layer = layers[0]
 
-        total = layer.featureCount()
-        progress = QProgressDialog("Verarbeitung läuft...", None, 0, total)
-        progress.setWindowTitle("Bitte warten")
-        progress.setWindowModality(True)
-        progress.setValue(0)
-        progress.show()
-
         crs = layer.crs()
         transform_context = QgsProject.instance().transformContext()
         target_crs = self.get_default_projected_crs(layer)
@@ -123,81 +159,70 @@ class AtlasGitterGenerator:
         to_target = QgsCoordinateTransform(crs, target_crs, transform_context)
         to_original = QgsCoordinateTransform(target_crs, crs, transform_context)
 
-        transformed_feats = []
+        total = layer.featureCount()
+        progress = QProgressDialog("Verarbeitung läuft...", None, 0, total)
+        progress.setWindowTitle("Bitte warten")
+        progress.setWindowModality(True)
+        progress.show()
+
+        transformed_features = []
         spatial_index = QgsSpatialIndex()
-        for i, f in enumerate(layer.getFeatures()):
-            geom = QgsGeometry(f.geometry())
+        for i, feature in enumerate(layer.getFeatures()):
+            geom = QgsGeometry(feature.geometry())
             geom.transform(to_target)
             if not geom.isEmpty():
                 new_feat = QgsFeature()
-                new_feat.setId(i)
                 new_feat.setGeometry(geom)
-                transformed_feats.append(new_feat)
+                transformed_features.append(geom)
                 spatial_index.insertFeature(new_feat)
             progress.setValue(i + 1)
             QApplication.processEvents()
 
-        if not transformed_feats:
+        if not transformed_features:
             QMessageBox.information(None, "Hinweis", "Keine gültigen Geometrien im Layer.")
             dialog.close()
             progress.close()
             return
 
-        grid_sizes = {
-            "1:500": {"hoch": (172, 140), "quer": (140, 172)},
-            "1:1000": {"hoch": (344, 280), "quer": (280, 344)},
-            "1:2000": {"hoch": (688, 560), "quer": (560, 688)},
-            "1:3000": {"hoch": (1032, 840), "quer": (840, 1032)},
-            "1:5000": {"hoch": (1720, 1400), "quer": (1400, 1720)},
-            "1:10000": {"hoch": (3440, 2800), "quer": (2800, 3440)},
-            "1:25000": {"hoch": (8600, 7000), "quer": (7000, 8600)}
-        }
-        height, width = grid_sizes[scale_label][orientation]
+        bounds = QgsGeometry.unaryUnion(transformed_features).boundingBox()
+        offset = 10
+        xmin, xmax = bounds.xMinimum() - offset, bounds.xMaximum() + offset
+        ymin, ymax = bounds.yMinimum() - offset, bounds.yMaximum() + offset
 
+        # Dinamik benzersiz isimlendirme
         layer_base_name = layer.name().replace(" ", "_").replace(":", "_")
         scale_clean = scale_label.replace(":", "_")
-        base_name = f"Gitter_{scale_clean}_{orientation}_{layer_base_name}"
-
+        base_name = f"Gitter_{scale_clean}_{paper_size}_{orientation}_{layer_base_name}"
         existing_names = [l.name() for l in QgsProject.instance().mapLayers().values()]
         counter = 1
         grid_layer_name = f"{base_name}_{counter:02d}"
-
         while grid_layer_name in existing_names:
             counter += 1
             grid_layer_name = f"{base_name}_{counter:02d}"
 
-        grid_layer = QgsVectorLayer("Polygon?crs=" + crs.authid(), grid_layer_name, "memory")
+        grid_layer = QgsVectorLayer(f"Polygon?crs={crs.authid()}", grid_layer_name, "memory")
         provider = grid_layer.dataProvider()
         provider.addAttributes([QgsField("grid", QVariant.String), QgsField("serial", QVariant.Int)])
         grid_layer.updateFields()
-
-        bounds = QgsGeometry.unaryUnion([f.geometry() for f in transformed_feats]).boundingBox()
-        offset = 10
-        xmin, xmax = bounds.xMinimum() - offset, bounds.xMaximum() + offset
-        ymin, ymax = bounds.yMinimum() - offset, bounds.yMaximum() + offset
 
         features = []
         row, y = 1, ymin
         while y < ymax:
             x, col = xmin, 1
             while x < xmax:
-                rect = QgsRectangle(x, y, x + width, y + height)
-                ids = spatial_index.intersects(rect)
-                if ids:
-                    geom_rect = QgsGeometry.fromRect(rect)
-                    intersecting = any(transformed_feats[idx].geometry().intersects(geom_rect) for idx in ids)
-                    if intersecting:
-                        feat = QgsFeature()
-                        feat.setFields(grid_layer.fields())
-                        geom_orig = QgsGeometry.fromRect(to_original.transformBoundingBox(rect))
-                        feat.setGeometry(geom_orig)
-                        label = f"{self.get_column_label(col)}{row}"
-                        feat.setAttribute("grid", label)
-                        feat.setAttribute("serial", 0)
-                        features.append((feat, geom_orig.centroid().asPoint()))
-                x += width
+                rect = QgsRectangle(x, y, x + grid_width, y + grid_height)
+                geom_rect = QgsGeometry.fromRect(rect)
+                if any(geom.intersects(geom_rect) for geom in transformed_features):
+                    feat = QgsFeature()
+                    feat.setFields(grid_layer.fields())
+                    feat.setGeometry(QgsGeometry.fromRect(to_original.transformBoundingBox(rect)))
+                    label = f"{self.get_column_label(col)}{row}"
+                    feat.setAttribute("grid", label)
+                    feat.setAttribute("serial", 0)
+                    features.append((feat, feat.geometry().centroid().asPoint()))
+                x += grid_width
                 col += 1
-            y += height
+            y += grid_height
             row += 1
 
         sorted_feats = sorted(features, key=lambda x: (-x[1].y(), x[1].x()))
@@ -220,8 +245,6 @@ class AtlasGitterGenerator:
         font = QFont("Arial", 10)
         font.setBold(True)
         text_format.setFont(font)
-        text_format.setSize(10)
-
         buffer_settings = QgsTextBufferSettings()
         buffer_settings.setEnabled(True)
         buffer_settings.setSize(1)
@@ -232,7 +255,6 @@ class AtlasGitterGenerator:
         label_settings.fieldName = "serial"
         label_settings.placement = QgsPalLayerSettings.AroundPoint
         label_settings.enabled = True
-
         grid_layer.setLabeling(QgsVectorLayerSimpleLabeling(label_settings))
         grid_layer.setLabelsEnabled(True)
         grid_layer.triggerRepaint()
