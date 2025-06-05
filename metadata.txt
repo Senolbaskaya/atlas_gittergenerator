@@ -2,7 +2,7 @@
 name=Atlas-Gittergenerator
 description=Erstellt regelmäßige Gitter für Atlas-Drucke basierend auf Maßstab und Layoutformat.
 about=Dieses Plugin ermöglicht die automatische Erstellung von Atlas-Gittern in verschiedenen Maßstäben und Layouts. Unterstützt dynamisches Intersecting und benutzerdefinierte Layernamen.
-version=1.2
+version=1.1
 qgisMinimumVersion=3.0
 author=Senol Baskaya
 email=senolbaskaya@gmail.com
