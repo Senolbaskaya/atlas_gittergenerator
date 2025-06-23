@@ -88,6 +88,31 @@ class AtlasGitterGenerator:
         ])
         layout.addWidget(self.paper_combo)
 
+        # manually adding Breite/Höhe (mm)
+        self.manual_size_checkbox = QCheckBox("Kartenausschnitt manuell festlegen (Breite/Höhe in mm):")
+        layout.addWidget(self.manual_size_checkbox)
+
+        manual_size_layout = QHBoxLayout()
+        self.manual_width = QLineEdit()
+        self.manual_width.setPlaceholderText("Breite (mm)")
+        self.manual_height = QLineEdit()
+        self.manual_height.setPlaceholderText("Höhe (mm)")
+        manual_size_layout.addWidget(QLabel("Breite:"))
+        manual_size_layout.addWidget(self.manual_width)
+        manual_size_layout.addWidget(QLabel("Höhe:"))
+        manual_size_layout.addWidget(self.manual_height)
+        layout.addLayout(manual_size_layout)
+
+        self.manual_width.setEnabled(False)
+        self.manual_height.setEnabled(False)
+        self.manual_size_checkbox.stateChanged.connect(
+            lambda: [
+                self.manual_width.setEnabled(self.manual_size_checkbox.isChecked()),
+                self.manual_height.setEnabled(self.manual_size_checkbox.isChecked()),
+                self.paper_combo.setEnabled(not self.manual_size_checkbox.isChecked())
+            ]
+        )
+
         run_button = QPushButton("Gitter erstellen")
         run_button.clicked.connect(lambda: self.generate_grid(dialog))
         layout.addWidget(run_button)
@@ -177,14 +202,28 @@ class AtlasGitterGenerator:
             scale_label = self.scale_combo.currentText().replace("1:", "")
             scale = int(scale_label)
 
-        # Convert grid size from mm to meters, then apply the scale
-        height_mm, width_mm = self.paper_sizes_mm[paper_size]
-        if orientation == "quer":
-            grid_width = width_mm / 1000 * scale  # meters
-            grid_height = height_mm / 1000 * scale
+        # Grid size (Breite/Höhe): If there is manual entry, it will be calculated first, otherwise it will be calculated automatically.
+        if self.manual_size_checkbox.isChecked():
+            try:
+                grid_width_mm = float(self.manual_width.text().replace(",", "."))
+                grid_height_mm = float(self.manual_height.text().replace(",", "."))
+                if grid_width_mm <= 0 or grid_height_mm <= 0:
+                    raise ValueError()
+            except Exception:
+                QMessageBox.warning(None, "Fehler", "Bitte gültige Werte für Breite und Höhe eingeben!")
+                return
         else:
-            grid_width = height_mm / 1000 * scale
-            grid_height = width_mm / 1000 * scale
+            height_mm, width_mm = self.paper_sizes_mm[paper_size]
+            if orientation == "quer":
+                grid_width_mm = width_mm
+                grid_height_mm = height_mm
+            else:
+                grid_width_mm = height_mm
+                grid_height_mm = width_mm
+
+        # Converts mm to meters and multiplies by scale:
+        grid_width = grid_width_mm / 1000 * scale  # meters
+        grid_height = grid_height_mm / 1000 * scale
 
         layers = QgsProject.instance().mapLayersByName(layer_name)
         if not layers or layer_name == "Kein Vektor-Layer gefunden":
@@ -194,12 +233,12 @@ class AtlasGitterGenerator:
         layer = layers[0]
         crs = layer.crs()
         transform_context = QgsProject.instance().transformContext()
-        # 1) First select a suitable metric CRS for the grid
+        #  First select a suitable metric CRS for the grid
         target_crs = self.get_default_projected_crs(layer)
         to_target = QgsCoordinateTransform(crs, target_crs, transform_context)
         to_original = QgsCoordinateTransform(target_crs, crs, transform_context)
 
-        # 2) Transform the layer to the metric CRS and create the grid here
+        #  Transform the layer to the metric CRS and create the grid here
         total = layer.featureCount()
         progress = QProgressDialog("Verarbeitung läuft...", None, 0, total)
         progress.setWindowTitle("Bitte warten")
@@ -225,8 +264,29 @@ class AtlasGitterGenerator:
         xmin, xmax = bounds.xMinimum() - offset, bounds.xMaximum() + offset
         ymin, ymax = bounds.yMinimum() - offset, bounds.yMaximum() + offset
 
+        if self.manual_size_checkbox.isChecked():
+            try:
+                grid_width_mm = float(self.manual_width.text().replace(",", "."))
+                grid_height_mm = float(self.manual_height.text().replace(",", "."))
+                if grid_width_mm <= 0 or grid_height_mm <= 0:
+                    raise ValueError()
+                size_string = f"{int(grid_width_mm)}x{int(grid_height_mm)}mm"
+            except Exception:
+                QMessageBox.warning(None, "Fehler", "Bitte gültige Werte für Breite und Höhe eingeben!")
+                return
+        else:
+            height_mm, width_mm = self.paper_sizes_mm[paper_size]
+            if orientation == "quer":
+                grid_width_mm = width_mm
+                grid_height_mm = height_mm
+            else:
+                grid_width_mm = height_mm
+                grid_height_mm = width_mm
+            size_string = paper_size
+
+        
         layer_base_name = layer.name().replace(" ", "_").replace(":", "_")
-        base_name = f"Gitter_{scale}_{paper_size}_{orientation}_{layer_base_name}"
+        base_name = f"Gitter_1:{scale}_{orientation}_{size_string}_{layer_base_name}"
         existing_names = [l.name() for l in QgsProject.instance().mapLayers().values()]
         counter = 1
         grid_layer_name = f"{base_name}_{counter:02d}"
@@ -234,12 +294,12 @@ class AtlasGitterGenerator:
             counter += 1
             grid_layer_name = f"{base_name}_{counter:02d}"
 
-        # 3) Create grids in the metric CRS (for most accurate results)
+
+        #  Create grids in the metric CRS (for most accurate results)
         grid_layer = QgsVectorLayer(f"Polygon?crs={target_crs.authid()}", grid_layer_name, "memory")
         provider = grid_layer.dataProvider()
         provider.addAttributes([QgsField("grid", QVariant.String), QgsField("serial", QVariant.Int)])
         grid_layer.updateFields()
-
 
         features = []
         row, y = 1, ymin
@@ -266,7 +326,7 @@ class AtlasGitterGenerator:
         for i, (feat, _) in enumerate(sorted_feats):
             feat.setAttribute("serial", i + 1)  # Here, serial is the real row number
 
-        # 4) If the CRS of the source layer is different, transform the grid layer later!
+        # If the CRS of the source layer is different, transform the grid layer later!
         if crs.authid() != target_crs.authid():
             for feat, _ in sorted_feats:
                 geom = feat.geometry()
