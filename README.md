@@ -1,10 +1,32 @@
-# Atlas-Gittergenerator (QGIS Plugin)
+# Atlas Grid Generator (QGIS Plugin)
 
-**Atlas Grid Generator** is a QGIS plugin designed to create regular grid layers for atlas-based map production.
+Generate object-aligned grids instead of fixed, misaligned grids in QGIS.
 
-It allows generating grids based on map scale and layout format, ensuring consistent and precise coverage. The plugin supports both full-layer processing and grid creation limited to selected features.
+Stop using static grids that don’t fit your data.
+
+---
+
+## Problem
+
+Standard grids in QGIS are static and often do not align with real-world objects.
+
+This leads to:
+- inefficient planning
+- poor spatial accuracy
+- time-consuming manual adjustments
+
+---
+
+## Solution
+
+Atlas Grid Generator creates grids that are aligned to your data instead of being fixed to arbitrary coordinates.
+
+It supports both classic atlas-based grid generation and object-based processing for more precise spatial workflows.
+
+---
 
 ![image](https://github.com/user-attachments/assets/acae8e37-83f6-4966-9934-019858fd5d8e)
+
 
 ---
 
@@ -40,7 +62,7 @@ Plugins → Manage and Install Plugins → Search for **Atlas Grid Generator**
 3. Optionally limit processing to selected features  
 4. Click *Create Grid*  
 
-
+<img width="546" height="367" alt="image" src="https://github.com/user-attachments/assets/7e46c97f-da95-4028-bf55-3ee2b9599487" />
 ---
 
 
