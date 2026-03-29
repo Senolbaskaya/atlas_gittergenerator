@@ -1,6 +1,6 @@
 # Atlas-Gittergenerator (QGIS Plugin)
 
-**Atlas Grid Generator is a QGIS plugin designed to create regular grid layers for atlas-based map production.
+**Atlas Grid Generator** is a QGIS plugin designed to create regular grid layers for atlas-based map production.
 
 It allows generating grids based on map scale and layout format, ensuring consistent and precise coverage. The plugin supports both full-layer processing and grid creation limited to selected features.
 
