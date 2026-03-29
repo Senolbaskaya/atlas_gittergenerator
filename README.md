@@ -1,6 +1,8 @@
 # Atlas-Gittergenerator (QGIS Plugin)
 
-**Atlas-Gittergenerator** is a QGIS plugin that generates a regular grid overlay based on the extent of a selected vector layer and a user-defined scale. It is particularly useful for creating print layouts (Atlas) with consistent coverage across a geographic area.
+**Atlas Grid Generator is a QGIS plugin designed to create regular grid layers for atlas-based map production.
+
+It allows generating grids based on map scale and layout format, ensuring consistent and precise coverage. The plugin supports both full-layer processing and grid creation limited to selected features.
 
 ![image](https://github.com/user-attachments/assets/acae8e37-83f6-4966-9934-019858fd5d8e)
 
@@ -8,22 +10,39 @@
 
 ## Features
 
-- Create a regular polygon grid over the selected vector layer  
-- Choose from predefined map scales (1:500 to 1:25000)  
-- Support for both portrait (`hoch`) and landscape (`quer`) layout orientations  
-- Automatically filters out grid cells that do not intersect the input layer  
-- Auto-labeling of grid cells with serial numbers  
-- Memory layer creation with customized styling and labeling  
+- Grid generation based on map scale and layout size
+- Optional processing of selected features only
+- Automatic CRS handling for geographic (non-metric) layers
+- Support for multiple paper sizes and custom dimensions
+- Multi-language user interface (English / German)
+
+---
+
+## Compatibility
+
+- **QGIS 3.x → Version 1.4.0**
+- **QGIS 4.x → Version 2.0.0**
 
 ---
 
 ## Installation
 
-1. Download the latest ZIP file  
-2. Open QGIS → Plugins → Manage and Install Plugins → Install from ZIP  
-3. Select the downloaded file and install  
+Install the plugin directly from the QGIS Plugin Manager:
+
+Plugins → Manage and Install Plugins → Search for **Atlas Grid Generator**
 
 ---
+
+## Usage
+
+1. Select a vector layer  
+2. Choose scale and layout format  
+3. Optionally limit processing to selected features  
+4. Click *Create Grid*  
+
+
+---
+
 
 ## Feedback & Issues
 
