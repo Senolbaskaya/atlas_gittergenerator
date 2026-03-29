@@ -62,7 +62,6 @@ Plugins → Manage and Install Plugins → Search for **Atlas Grid Generator**
 3. Optionally limit processing to selected features  
 4. Click *Create Grid*  
 
-<img width="546" height="367" alt="image" src="https://github.com/user-attachments/assets/7e46c97f-da95-4028-bf55-3ee2b9599487" />
 ---
 
 
