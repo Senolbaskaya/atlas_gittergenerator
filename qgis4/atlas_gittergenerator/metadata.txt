@@ -1,0 +1,24 @@
+[general]
+name=Atlas Grid Generator
+
+description=Creates regular grids for atlas layouts based on scale and layout format. Optionally, grids can be generated only for selected features.
+description[de]=Erstellt regelmäßige Gitter für Atlas-Drucke basierend auf Maßstab und Layoutformat. Optional kann die Gittererstellung nur für ausgewählte Objekte erfolgen.
+
+about=This plugin generates regular atlas grids based on the selected layer, scale, and layout format. For non-metric source data, grid calculations are performed in an appropriate projected coordinate system and the result is stored in the original coordinate reference system of the layer. Optionally, grid generation can be limited to selected features only. This version is designed for QGIS 4.x.
+about[de]=Dieses Plugin erstellt regelmäßige Atlas-Gitter basierend auf dem gewählten Layer, Maßstab und Layoutformat. Bei nicht-metrischen Quelldaten erfolgt die Berechnung in einem geeigneten projizierten Koordinatensystem, während das Ergebnis im ursprünglichen Koordinatensystem des Layers gespeichert wird. Optional kann die Gittererstellung auf ausgewählte Objekte beschränkt werden. Diese Version ist für QGIS 4.x ausgelegt.
+
+version=2.0.0
+qgisMinimumVersion=4.0
+qgisMaximumVersion=4.99
+
+author=Senol Baskaya
+email=senolbaskaya@gmail.com
+icon=icon.png
+category=Vector
+
+homepage=https://github.com/Senolbaskaya/atlas_gittergenerator
+repository=https://github.com/Senolbaskaya/atlas_gittergenerator
+tracker=https://github.com/Senolbaskaya/atlas_gittergenerator/issues
+
+changelog=Initial QGIS 4 release. Added optional grid generation for selected features only. Added bilingual user interface support for English and German. Improved handling of non-metric source data using appropriate projected coordinate systems. Manual scale and map extent definition retained.
+changelog[de]=Erste QGIS-4-Version. Unterstützung für die optionale Gittererstellung nur auf Basis ausgewählter Objekte hinzugefügt. Zweisprachige Benutzeroberfläche für Englisch und Deutsch ergänzt. Verarbeitung nicht-metrischer Quelldaten über geeignete projizierte Koordinatensysteme verbessert. Manuelle Maßstabs- und Kartenausschnittsdefinition beibehalten.

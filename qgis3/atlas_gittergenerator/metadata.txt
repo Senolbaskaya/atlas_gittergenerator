@@ -1,0 +1,24 @@
+[general]
+name=Atlas-Gittergenerator
+
+description=Creates regular grids for atlas layouts based on scale and layout format. Optionally, grids can be generated only for selected features.
+description[de]=Erstellt regelmäßige Gitter für Atlas-Drucke basierend auf Maßstab und Layoutformat. Optional kann die Gittererstellung nur für ausgewählte Objekte erfolgen.
+
+about=This plugin creates regular atlas grids based on the selected layer, scale, and layout format. Grid creation can optionally be limited to selected features only. Manual scale and map extent definition are supported.
+about[de]=Dieses Plugin erstellt regelmäßige Atlas-Gitter basierend auf dem gewählten Layer, Maßstab und Layoutformat. Die Gittererstellung kann optional auf ausgewählte Objekte beschränkt werden. Die manuelle Festlegung von Maßstab und Kartenausschnitt wird unterstützt.
+
+version=1.4.0
+qgisMinimumVersion=3.0
+qgisMaximumVersion=3.99
+
+author=Senol Baskaya
+email=senolbaskaya@gmail.com
+icon=icon.png
+category=Vector
+
+homepage=https://github.com/Senolbaskaya/atlas_gittergenerator
+repository=https://github.com/Senolbaskaya/atlas_gittergenerator
+tracker=https://github.com/Senolbaskaya/atlas_gittergenerator/issues
+
+changelog=Added optional grid generation for selected features only. Added bilingual user interface support for English and German. Manual scale and map extent definition retained. This release is intended for QGIS 3.x.
+changelog[de]=Option zur Gittererstellung nur für ausgewählte Objekte hinzugefügt. Zweisprachige Benutzeroberfläche für Englisch und Deutsch ergänzt. Manuelle Maßstabs- und Kartenausschnittsdefinition beibehalten. Diese Version ist für QGIS 3.x vorgesehen.
